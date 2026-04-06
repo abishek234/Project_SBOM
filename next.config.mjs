@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    output: 'export',      // <-- enables static export
     images: {
-        unoptimized: true,
+        unoptimized: true, // keep your current image config
     },
 };
 
