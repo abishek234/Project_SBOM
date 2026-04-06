@@ -1,9 +1,10 @@
 fastapi
-uvicorn
+uvicorn[standard]
 motor
 odmantic
-python-jose
-passlib[bcrypt]
+python-jose[cryptography]
+passlib[argon2]
+argon2-cffi
 python-multipart
 aiofiles
 cyclonedx-python-lib
