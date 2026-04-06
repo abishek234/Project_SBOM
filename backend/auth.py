@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from passlib.context import CryptContext
-from database import engine, User
+from database import engine, User,users_collection
 from jose import jwt
 from datetime import datetime, timedelta
 import random
@@ -15,13 +15,19 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__rounds=12,
+    bcrypt__ident="2b",  # Use 2b variant
+)
 
 # In-memory OTP store (email -> {otp, expiry})
 otp_store = {}
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 # Mail Configuration
 mail_config = ConnectionConfig(
@@ -55,37 +61,78 @@ class PasswordResetRequest(BaseModel):
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=30)
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+
+def hash_password(password: str) -> str:
+    """
+    ✅ FIXED: Truncate password to 72 bytes before hashing
+    bcrypt has a 72-byte limit
+    """
+    # Truncate to 72 bytes (bcrypt limit)
+    password_bytes = password.encode('utf-8')[:72]
+    return pwd_context.hash(password_bytes.decode('utf-8'))
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    ✅ FIXED: Truncate password to 72 bytes before verification
+    """
+    # Truncate to 72 bytes (bcrypt limit)
+    password_bytes = plain_password.encode('utf-8')[:72]
+    return pwd_context.verify(password_bytes.decode('utf-8'), hashed_password)
+
+
 @router.post("/signup")
 async def signup(req: SignupRequest):
-    # Check existing
-    existing = await engine.find_one(User, User.email == req.email)
+    # Check if user exists
+    existing = await users_collection.find_one({"email": req.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
-        
-    hashed = pwd_context.hash(req.password)
-    user = User(email=req.email, password_hash=hashed, full_name=req.full_name, avatar_url=f"https://api.dicebear.com/7.x/initials/svg?seed={req.full_name}")
+
+    # ✅ Use fixed hash_password function
+    hashed = hash_password(req.password)
+    
+    user = User(
+        email=req.email,
+        password_hash=hashed,
+        name=req.name
+    )
     await engine.save(user)
     
-    return {"message": "User created successfully"}
+    token = create_access_token({"sub": req.email})
+    
+    return {
+        "status": "success",
+        "token": token,
+        "user": {
+            "email": user.email,
+            "name": user.name
+        }
+    }
+
 
 @router.post("/login")
 async def login(req: LoginRequest):
-    user = await engine.find_one(User, User.email == req.email)
-    if not user or not pwd_context.verify(req.password, user.password_hash):
+    # Find user
+    user_doc = await users_collection.find_one({"email": req.email})
+    if not user_doc:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-        
-    token = create_access_token({"sub": user.email})
+    
+    # ✅ Use fixed verify_password function
+    if not verify_password(req.password, user_doc["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    token = create_access_token({"sub": req.email})
+    
     return {
-        "access_token": token, 
-        "token_type": "bearer",
+        "status": "success",
+        "token": token,
         "user": {
-            "email": user.email,
-            "full_name": user.full_name,
-            "avatar_url": user.avatar_url
+            "email": user_doc["email"],
+            "name": user_doc.get("name", "")
         }
     }
 
