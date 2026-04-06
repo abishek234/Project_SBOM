@@ -20,7 +20,7 @@ export default function ProfilePage() {
         if (savedUser) {
             const userData = JSON.parse(savedUser);
             // Fetch fresh data from backend
-            fetch(`http://127.0.0.1:8000/auth/profile/${userData.email}`)
+            fetch(`https://project-sbom.onrender.com/auth/profile/${userData.email}`)
                 .then(res => res.json())
                 .then(data => {
                     setUser(data);
@@ -38,7 +38,7 @@ export default function ProfilePage() {
     const handleRequestOTP = async () => {
         setOtpLoading(true);
         try {
-            const res = await fetch('http://127.0.0.1:8000/auth/request-otp', {
+            const res = await fetch('https://project-sbom.onrender.com/auth/request-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: user.email })
@@ -60,7 +60,7 @@ export default function ProfilePage() {
         e.preventDefault();
         setOtpLoading(true);
         try {
-            const res = await fetch('http://127.0.0.1:8000/auth/reset-password', {
+            const res = await fetch('https://project-sbom.onrender.com/auth/reset-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

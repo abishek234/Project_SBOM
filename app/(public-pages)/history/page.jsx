@@ -26,7 +26,7 @@ export default function HistoryPage() {
 
     const fetchHistory = async (email) => {
         try {
-            const res = await fetch(`http://127.0.0.1:8000/reports/history?email=${email}`);
+            const res = await fetch(`https://project-sbom.onrender.com/reports/history?email=${email}`);
             if (res.ok) {
                 const data = await res.json();
                 setHistory(data);
@@ -40,7 +40,7 @@ export default function HistoryPage() {
 
     const handleDownload = async (reportId) => {
         try {
-            const res = await fetch(`http://127.0.0.1:8000/reports/export/${reportId}`);
+            const res = await fetch(`https://project-sbom.onrender.com/reports/export/${reportId}`);
             const data = await res.json();
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = window.URL.createObjectURL(blob);
@@ -56,7 +56,7 @@ export default function HistoryPage() {
     const handleDelete = async (reportId) => {
         if (!confirm("Are you sure you want to delete this scan report?")) return;
         try {
-            const res = await fetch(`http://127.0.0.1:8000/reports/${reportId}`, {
+            const res = await fetch(`https://project-sbom.onrender.com/reports/${reportId}`, {
                 method: 'DELETE'
             });
             if (res.ok) {

@@ -50,7 +50,7 @@ function ProjectRiskContent() {
         setStep('scanning');
         setScanStatus('Retrieving saved report...');
         try {
-            const res = await fetch(`http://127.0.0.1:8000/reports/${id}`);
+            const res = await fetch(`https://project-sbom.onrender.com/reports/${id}`);
             console.log(res);
             if (res.ok) {
                 const data = await res.json();
@@ -109,11 +109,11 @@ function ProjectRiskContent() {
             let endpoint = '';
             if (mode === 'single') {
                 formData.append("file", files[0]);
-                endpoint = 'http://127.0.0.1:8000/scan/code';
+                endpoint = 'https://project-sbom.onrender.com/scan/code';
             } else {
                 formData.append("file1", files[0]);
                 formData.append("file2", files[1]);
-                endpoint = 'http://127.0.0.1:8000/scan/diff';
+                endpoint = 'https://project-sbom.onrender.com/scan/diff';
             }
 
             // Start Simulated Progress
@@ -164,12 +164,12 @@ function ProjectRiskContent() {
                 setTimeout(() => setStep('results'), 500);
             } else {
                 const error = await res.json();
-                alert(error.detail || 'Analysis failed. Check your connection to http://127.0.0.1:8000');
+                alert(error.detail || 'Analysis failed. Check your connection to https://project-sbom.onrender.com');
                 setStep('upload');
             }
         } catch (err) {
             console.error(err);
-            alert('Connection error. Is the backend running on http://127.0.0.1:8000?');
+            alert('Connection error. Is the backend running on https://project-sbom.onrender.com?');
             setStep('upload');
         }
     };
@@ -336,7 +336,7 @@ function ProjectRiskContent() {
                                         <button
                                             onClick={async () => {
                                                 if (!results?.reportId) return;
-                                                const res = await fetch(`http://127.0.0.1:8000/reports/export/${results.reportId}`);
+                                                const res = await fetch(`https://project-sbom.onrender.com/reports/export/${results.reportId}`);
                                                 const blob = await res.blob();
                                                 const url = window.URL.createObjectURL(blob);
                                                 const a = document.createElement('a');
