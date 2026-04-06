@@ -1,0 +1,14 @@
+{
+    "name": "toxic-project",
+    "version": "1.0.0",
+    "dependencies": {
+        "log4j": "2.14.1",
+        "lodash": "4.17.15",
+        "react-native": "0.63.0",
+        "spring-web": "5.3.17",
+        "struts": "2.3.31",
+        "openssl": "1.0.1f",
+        "axios": "0.21.1",
+        "express": "4.16.0"
+    }
+}

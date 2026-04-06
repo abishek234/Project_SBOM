@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+motor
+odmantic
+python-jose
+passlib[bcrypt]
+python-multipart
+aiofiles
+cyclonedx-python-lib
+pydantic
+email-validator
+fastapi-mail
+httpx
+packageurl-python
