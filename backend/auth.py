@@ -9,24 +9,29 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pydantic import EmailStr
 import os
 
+from dotenv import load_dotenv
+
+# Load from the root .env
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
+
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # In-memory OTP store (email -> {otp, expiry})
 otp_store = {}
 
-SECRET_KEY = "verix-super-secret-key"
-ALGORITHM = "HS256"
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 
-# Mail Configuration (Using placeholders - User should set these in env)
+# Mail Configuration
 mail_config = ConnectionConfig(
-    MAIL_USERNAME = "abishek.cs21@bitsathy.ac.in",
-    MAIL_PASSWORD = "lbbwasevnnervutk",
-    MAIL_FROM = "abishek.cs21@bitsathy.ac.in",
-    MAIL_PORT = 587,
-    MAIL_SERVER = "smtp.gmail.com",
-    MAIL_STARTTLS = True,
-    MAIL_SSL_TLS = False,
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME"),
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD"),
+    MAIL_FROM = os.getenv("MAIL_FROM"),
+    MAIL_PORT = int(os.getenv("MAIL_PORT", 587)),
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com"),
+    MAIL_STARTTLS = os.getenv("MAIL_STARTTLS", "True").lower() == "true",
+    MAIL_SSL_TLS = os.getenv("MAIL_SSL_TLS", "False").lower() == "true",
     USE_CREDENTIALS = True,
     VALIDATE_CERTS = True
 )

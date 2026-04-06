@@ -3,10 +3,16 @@ import random
 import httpx
 from database import engine, Vulnerability
 
+import os
+from dotenv import load_dotenv
+
+# Load from the root .env
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
+
 class RiskEngine:
     def __init__(self):
         self.internal_prefixes = ["student-", "verix-", "internal-"]
-        self.osv_url = "https://api.osv.dev/v1/query"
+        self.osv_url = os.getenv("OSV_QUERY_URL")
         self.ecosystem_map = {
             "npm": "npm",
             "pypi": "PyPI"
