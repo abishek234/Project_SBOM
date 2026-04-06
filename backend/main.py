@@ -13,16 +13,39 @@ from database import (
 from auth import router as auth_router
 from bson import ObjectId
 from datetime import datetime
+import os
 
 app = FastAPI()
 
+ALLOWED_ORIGINS = [
+    "https://project-sbom-frontend.onrender.com",  # Your frontend URL
+    "http://localhost:3000",  # Local development
+    "http://localhost:5173",  # Vite local dev
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
+
+# Add environment variable support
+FRONTEND_URL = os.getenv("FRONTEND_URL")
+if FRONTEND_URL and FRONTEND_URL not in ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS.append(FRONTEND_URL)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # This already allows all origins
+    allow_origins=ALLOWED_ORIGINS,  # ✅ Specific origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],  # ✅ NEW: Expose all headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "Accept",
+        "Origin",
+        "X-Requested-With",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
+    ],
+    expose_headers=["*"],
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
 
 app.include_router(auth_router, prefix="/auth")
