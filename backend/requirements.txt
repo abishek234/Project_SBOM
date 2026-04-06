@@ -12,3 +12,4 @@ email-validator
 fastapi-mail
 httpx
 packageurl-python
+python-dotenv

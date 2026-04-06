@@ -40,8 +40,22 @@ class Vulnerability(Model):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 # Database Connection
-client = AsyncIOMotorClient("mongodb+srv://avinesh14:Abishek1424@cluster0.wf5jq0s.mongodb.net")
-engine = AIOEngine(client=client, database="verix_sbom_db")
+import os
+from dotenv import load_dotenv
+
+# Load from the root .env
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
+
+MONGODB_URL = os.getenv("MONGODB_URL")
+DATABASE_NAME = os.getenv("DATABASE_NAME")
+
+if not MONGODB_URL:
+    raise RuntimeError("MONGODB_URL not found in environment variables. Please check your .env file.")
+if not DATABASE_NAME:
+    raise RuntimeError("DATABASE_NAME not found in environment variables. Please check your .env file.")
+
+client = AsyncIOMotorClient(MONGODB_URL)
+engine = AIOEngine(client=client, database=DATABASE_NAME)
 
 
 async def get_engine():
